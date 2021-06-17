@@ -23,6 +23,8 @@ def main():
     c.connect(('localhost', 12345))
     user_name = input("Enter UserName")
     c.send(user_name.encode('utf-8'))
+    room_id = input("Enter Room ID")
+    c.send(room_id.encode('utf-8'))
     receive_thread = threading.Thread(target = recieve_msg_server, args = (c, ))
     receive_thread.start()
 
