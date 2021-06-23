@@ -18,25 +18,31 @@ def get_index_client(clients, cur_conn):
     return i
 
 def new_client(conn, addr):
-    username = conn.recv(4096).decode('utf-8')
-    room_id = conn.recv(4096).decode('utf-8')
+    credentials = conn.recv(4096).decode('utf-8')
+    username = ""
+    room_id = ""
+    ok = 0
+    for c in credentials:
+        if c != '+' and ok == 0:
+            username += c
+        elif c == '+':
+            ok = 1
+            continue
+        else:
+            room_id += c
 
     if room_id not in rooms:
-        conn.send("New Group is Created".encode('utf-8'))
+        conn.send(("New Group is Created" + "\n").encode('utf-8'))
     else:
-        conn.send("Welcome to Chat Room".encode('utf-8'))
+        conn.send(("Welcome to Chat Room" + "\n").encode('utf-8'))
     rooms[room_id].append(conn)
-    for i in rooms:
-        print(i)
 
-    msg = "Welcome " + username + ". Use 'exit' to quit"
-    conn.send(msg.encode('utf-8'))
     client_usernames.append(username)
     
     while True:
         msg = conn.recv(4096).decode('utf-8')
-        print(msg)
-        if not msg or msg == "exit": 
+        #print(msg)
+        if msg == "exit": 
             break
         idx = get_index_client(clients, conn)
         sender_username = client_usernames[idx]
@@ -63,7 +69,7 @@ def main():
     while True:
         c, addr = s.accept()
         clients.append(c)
-        #print(len(clients))
+        print("Connected")
         thread = threading.Thread(target = new_client, args = (c, addr))
         thread.start()
 
